@@ -1,6 +1,8 @@
 #'
 #' Like other reports, we begin with some modified calls to ADRCDash for processing purposes
 #' Some functions for data processing
+#' 
+#' @import REDCapR
 #'
 #'
 

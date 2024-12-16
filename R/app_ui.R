@@ -9,10 +9,6 @@
 #'     DO NOT REMOVE.
 #'
 #' @import shiny
-#' @import shinydashboard
-#' @import shinydashboardPlus
-#' @import shinyWidgets
-#' @importFrom plotly plotlyOutput
 #' @import data.table
 #'
 #' @noRd
@@ -26,25 +22,42 @@ app_ui <- function(request) {
     # Leave this function for adding external resources - adds CSS (www) and Images (img)
     golem_add_external_resources(),
     
-    dashboardPage(
+    bs4Dash::dashboardPage(
       
       #Title of webpage
       title="ADRC Data Visualization",
+      fullscreen = TRUE,
+      dark = NULL,
+      scrollToTop = TRUE,
+      preloader = preloader_spinner(),
       
       
       
       ##
       #Header of page - using shinydashboardPlus
       ##
-      
-      header = dashboardHeaderPlus(titleWidth = 350,
-                                   
-                                   #Placement of UAB logo from images file
-                                   title = tags$a(tags$img(src="img/logo.png", height='80', width='252', style="padding-top: 10px"))
-                                   
-                                   #Defining date toggle (adrc_toggle) as clickable checkbox in header
-                                  
-      ),
+      # 
+      # header = dashboardHeaderPlus(titleWidth = 350,
+      #                              
+      #                              #Placement of UAB logo from images file
+      #                              title = tags$a(tags$img(src="img/logo.png", height='80', width='252', style="padding-top: 10px"))
+      #                              
+      #                              #Defining date toggle (adrc_toggle) as clickable checkbox in header
+      #                             
+      # ),
+
+        header = bs4Dash::dashboardHeader(
+          title = tags$a(
+            href = 'https://www.uab.edu/medicine/alzheimers/',
+            target = "_blank",
+            tags$img(
+              src = 'www/logo-ADC.png',
+              width = "100%",
+              style = "padding: 8% 10% 2% 10%", 
+              alt = 'UAB logo'
+            )
+          )
+        ),
       
       
       
@@ -52,24 +65,23 @@ app_ui <- function(request) {
       #Sidebar of page - using shinydashboard
       ##
       
-      sidebar = dashboardSidebar(
+      sidebar = bs4Dash::dashboardSidebar(
         id = "main_sidebar",
+        skin = 'dark',
+        #Width of sidebar to accommodate width of title in header
+        width = 350,
+        minified = FALSE,
         
         #Main sidebar menu contains three submenus
-        sidebarMenu(id = "main_sidebar_menu",
+        bs4Dash::sidebarMenu(id = "main_sidebar_menu",
                     
                     #ID Entry
-                    textInput(inputId="id_entry", label="ADC ID"),
+                    shiny::textInput(inputId="id_entry", label="ADC ID"),
                     
                     #Process Button
-                    actionButton(inputId = "compare_button", label = "Compare Reviews")
+                    shiny::actionButton(inputId = "compare_button", label = "Compare Reviews")
                     
-                    ),
-                    
-                    
-                    
-        #Width of sidebar to accommodate width of title in header
-        width = 350
+                    )
       ),
       
       
@@ -77,14 +89,15 @@ app_ui <- function(request) {
       #Main body of page
       ##
       
-      body = dashboardBody(
+      body = bs4Dash::dashboardBody(
         
         #Initialize use of waiter and call custom CSS file
-        waiter::use_waiter(),
-        tags$head(tags$link(rel="stylesheet", type="text/css", href="custom.css"),
-                  tags$style((".sidebar-menu li { margin-top:20px;}"))),
+        htmltools::tags$head(
+          tags$link(rel="stylesheet", type="text/css", href="ADRC-theme.css"),
+          tags$link(rel="stylesheet", type="text/css", href="ADRC-dash.css"),
+          tags$style((".sidebar-menu li { margin-top:20px;}"))),
         
-        fluidRow(box(width=12,
+        fluidRow(bs4Dash::box(width=12,
                      title="Reviewer Comparison by Visit",
                      div(uiOutput("comparison_tables"), style="font-size:20px"),
                      align="center" ))

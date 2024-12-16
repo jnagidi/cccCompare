@@ -1,6 +1,6 @@
 #'
 #' Main function that takes an ID and builds out the comparison table
-#'
+#' @import data.table
 #'
 
 

@@ -11,7 +11,7 @@
 app_server <- function( input, output, session ) {
 
   #Starting table
-  output$comparison_tables <- renderUI(panel(wait_table))
+  output$comparison_tables <- renderUI(tabPanel(wait_table))
   
   #Standard call to a modification of the initial_redcap_process of ADRCDash
   data_curr <- redcap_process()
@@ -21,7 +21,7 @@ app_server <- function( input, output, session ) {
   ccc_labels <- get_redcap_labels(data_curr, ccc_cols)
   
   #Beging by showing the ready table
-  output$comparison_tables <- renderUI(panel(ready_table))
+  output$comparison_tables <- renderUI(tabPanel(ready_table))
 
   #Everything else is held within the observe event button
   observeEvent(input$compare_button, {
@@ -34,7 +34,7 @@ app_server <- function( input, output, session ) {
     data_proc <- pull_id(data_curr, id_curr())
    
     #Return NULL table by default
-    if(is.null(data_proc)){ output$comparison_tables <- renderUI(panel(default_table))
+    if(is.null(data_proc)){ output$comparison_tables <- renderUI(tabPanel(default_table))
     
     } else{
 

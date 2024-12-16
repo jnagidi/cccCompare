@@ -1,7 +1,7 @@
 #'
 #'
 #' We build out the header by event
-#'
+#' @import data.table
 
 build_header <- function(.data, dict = header_columns_dict){
   

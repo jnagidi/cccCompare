@@ -15,10 +15,18 @@ app_server <- function( input, output, session ) {
   
   #Standard call to a modification of the initial_redcap_process of ADRCDash
   data_curr <- redcap_process()
+  labels_curr <- data_curr[["labels"]]
+  data_curr <- data_curr[["data"]]
 
   #Get the column sets for comparison as well as redcap labels
   ccc_cols <- get_ccc_cols(data_curr)
-  ccc_labels <- get_redcap_labels(data_curr, ccc_cols)
+  #ccc_labels <- get_redcap_labels(data_curr, ccc_cols)
+  labels_curr <- labels_curr[colnames(data_curr) %in% ccc_cols]
+  labels_curr <- gsub("\\.\\.\\.\\d+$", "", labels_curr)
+  names(labels_curr) <- ccc_cols
+  ccc_labels <- get_redcap_labels(labels_curr, ccc_cols)
+  
+  
   
   #Beging by showing the ready table
   output$comparison_tables <- renderUI(tabPanel(ready_table))

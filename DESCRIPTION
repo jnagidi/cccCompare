@@ -14,7 +14,8 @@ Imports:
     processx,
     shiny (>= 1.6.0),
     data.table,
-    REDCapR
+    REDCapR,
+    pkgload
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2

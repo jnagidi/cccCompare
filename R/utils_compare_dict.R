@@ -58,9 +58,11 @@ get_redcap_labels <- function(.dat, redcap_cols,
                               subset_string = "_rev1$",
                               rename_string_in = "ccc_(.*?)_rev1$", 
                               rename_string_out = "\\1"){
-
+  
   #Extract labels
-  labels_curr <- do.call(c, lapply(.dat[,colnames(.dat) %in% redcap_cols], function(.var){attributes(.var)$label}))
+  if(is.data.frame(.dat)){
+    labels_curr <- do.call(c, lapply(.dat[,colnames(.dat) %in% redcap_cols], function(.var){attributes(.var)$label}))
+  } else labels_curr <- .dat
   
   #Drop HTML
   labels_curr <- gsub("<.*?>", "", labels_curr)

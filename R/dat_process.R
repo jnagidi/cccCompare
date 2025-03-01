@@ -3,37 +3,111 @@
 #' Some functions for data processing
 #' 
 #' @import REDCapR
-#'
+#' @import redcapAPI
 #'
 
+
+visit_read_in_alt <- function(token, synth = FALSE, dict = NULL, subtable_dict = NULL, use_redcap_factors = FALSE, ...){
+
+  if(synth == FALSE){
+    dict <- ADRCDash:::redcap_dict
+
+    #1 - Read in the NACC dataset
+    visit_token <- Sys.getenv(token)
+    nacc_curr_list <-  ADRCDash:::visit_read_in(token = "REDCAP_NACC_API_NEW", subtable_dict = NULL, .type = "nacc", synth=FALSE)
+    nacc_curr <- nacc_curr_list[["visits"]]
+
+    #visit_conn <- redcapAPI::redcapConnection(url="https://redcap.dom.uab.edu/api/", token=visit_token)
+    #visit_curr <- redcapAPI::exportRecords(visit_conn, factors = use_redcap_factors)
+    visit_curr <- REDCapR::redcap_read(redcap_uri = "https://redcap.dom.uab.edu/api/", token = visit_token)$data
+    labels_curr <- colnames(REDCapR::redcap_read(redcap_uri = "https://redcap.dom.uab.edu/api/", token = visit_token, records=1, raw_or_label_headers = "label")$data)
+    
+    
+
+    #Coerce to data.table for populating
+    visit_curr <- data.table::as.data.table(visit_curr)
+
+
+    #2- Extract subtable if needed (for example, inventory and M1 from )
+    if(!is.null(subtable_dict)){
+      #INPUT LATER - Currently a second call is made to REDCAP_NACC_API
+    } else{
+      subtable_curr <- NULL
+    }
+
+
+    #3 - Fill down subject_data event
+
+    #First get the column names associated specifically with "subject_data_arm_1" by checking which columns are all NA's
+    visit_subj_data <- visit_curr[visit_curr[[dict[["event_col"]]]] == dict[["subj_event"]],]
+    subj_data_cols_to_drop <- which(colSums(is.na(visit_subj_data)) == nrow(visit_subj_data))
+
+    #Assuming it's not length 0, drop those columns
+    if(length(subj_data_cols_to_drop) > 0){
+      subj_data_cols <- colnames(visit_subj_data)[-subj_data_cols_to_drop]
+    } else {
+      subj_data_cols <- colnames(visit_subj_data)
+    }
+
+    #Fill down the subject_info rows - this is all done by reference within fill_down_rows so we technically don't need to assign it
+    visit_curr <- ADRCDash:::fill_down_rows(visit_curr, dict = subj_data_cols, fill_key = dict[["redcap_key"]])
+
+  } else{
+    visit_curr <- data.table::as.data.table(nacc_synth)
+    subtable_curr <- NULL
+  }
+
+
+  #4 - Run redcap_drop_invalid_rows which checks on the A1 date
+  #This drops the subject data which never has a min_field data and any visit_info events missing from the min_field dictionary
+  #We pass ... to make use of certain projects e.g. min_fields differs between nacc visits and neuroimaging visits
+  visit_curr <- ADRCDash:::redcap_drop_invalid_rows(visit_curr, ...)
+
+  #Finally, reorder the data frames
+  data.table::setorderv(visit_curr, cols = c(dict[["adrc_key"]], dict[["visit_col"]]))
+
+
+
+  #Return a list with each processed table which can be called as needed
+  return(list(visits = visit_curr, subtable = subtable_curr, labels = labels_curr))
+}
 
 redcap_process <- function(){
-  
-  
+
+
   #Read in data using modified redcap_readin function from ADRCDash
   #Unfortunately the export_forms_secondary argument isn't really working, causing issues with the downstream merge so we just pull everything from the NACC REDCap
   #.data <- ADRCDash:::redcap_read_in(simple = TRUE, synth = FALSE, use_spinner = FALSE, use_redcap_factors = TRUE)#,
                                      #export_forms_secondary = c("subject_info", "clinical_consensus_reviewer_1", "clinical_consensus_reviewer_2")
-  .data <- ADRCDash:::visit_read_in(token = "REDCAP_NACC_API_NEW", subtable_dict = NULL, .type = "nacc", synth=FALSE, use_redcap_factors = TRUE)[["visits"]]
-  
+  #.data <- ADRCDash:::visit_read_in(token = "REDCAP_NACC_API_NEW", subtable_dict = NULL, .type = "nacc", synth=FALSE, use_redcap_factors = TRUE)[["visits"]]
+  .data_list <- visit_read_in_alt(token = "REDCAP_NACC_API_NEW", subtable_dict = NULL, .type = "nacc", synth=FALSE, use_redcap_factors = TRUE)
+  .data <- .data_list[["visits"]]
+  .labels <- .data_list[["labels"]]
+
   #Filter out any rows missing all reviewer dates
   .data <- drop_missing_rows(.data)
-  
+
   #Make sure the dataframe is properly sorted according to date
   #.data <- ADRCDash:::redcap_order_rows(.data)
-  
+
   #Build age variable based on DoB
   .data$birthmo <- as.numeric(as.character(.data$birthmo))
   .data[,Age := make_age(.SD, .today=FALSE),by=id_var]
-  
+
   #Subset columns based on our restricted set
-  .data <- .data[,grep(col_pull_grep, colnames(.data)), with=FALSE]
-  
+  .idx_grep <- grep(col_pull_grep, colnames(.data))
+  .data <- .data[,.idx_grep, with=FALSE]
+  .labels <- .labels[.idx_grep]
+
   #Do a fill down on whatever is left, currently only education and race from A1 based on the new processing done by visit_read_in() in ADRCDash:
   .data <- ADRCDash:::fill_down_rows(.data, dict = c("educ", "race"))
-  
-  return(as.data.frame(.data))
+
+  return(list(data = as.data.frame(.data), labels = .labels))
 }
+
+
+
+
 
 
 

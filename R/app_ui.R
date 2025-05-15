@@ -45,19 +45,19 @@ app_ui <- function(request) {
       #                              #Defining date toggle (adrc_toggle) as clickable checkbox in header
       #                             
       # ),
-
-        header = bs4Dash::dashboardHeader(
-          title = tags$a(
-            href = 'https://www.uab.edu/medicine/alzheimers/',
-            target = "_blank",
-            tags$img(
-              src = 'www/logo-ADC.png',
-              width = "100%",
-              style = "padding: 8% 10% 2% 10%", 
-              alt = 'UAB logo'
-            )
+      
+      header = bs4Dash::dashboardHeader(
+        title = tags$a(
+          href = 'https://www.uab.edu/medicine/alzheimers/',
+          target = "_blank",
+          tags$img(
+            src = 'www/logo-ADC.png',
+            width = "100%",
+            style = "padding: 8% 10% 2% 10%", 
+            alt = 'UAB logo'
           )
-        ),
+        )
+      ),
       
       
       
@@ -68,20 +68,24 @@ app_ui <- function(request) {
       sidebar = bs4Dash::dashboardSidebar(
         id = "main_sidebar",
         skin = 'dark',
-        #Width of sidebar to accommodate width of title in header
         width = 350,
         minified = FALSE,
+        fixed = TRUE,
         
-        #Main sidebar menu contains three submenus
-        bs4Dash::sidebarMenu(id = "main_sidebar_menu",
-                    
-                    #ID Entry
-                    shiny::textInput(inputId="id_entry", label="ADC ID"),
-                    
-                    #Process Button
-                    shiny::actionButton(inputId = "compare_button", label = "Compare Reviews")
-                    
-                    )
+        div(
+          style = "padding: 20px;",
+          shiny::textInput(
+            inputId = "id_entry",
+            label = "ADC ID",
+            width = "100%"
+          ),
+          shiny::actionButton(
+            inputId = "compare_button",
+            label = "Compare Reviews",
+            width = "100%",
+            style = "margin-top: 10px;"
+          )
+        )
       ),
       
       
@@ -95,21 +99,45 @@ app_ui <- function(request) {
         htmltools::tags$head(
           tags$link(rel="stylesheet", type="text/css", href="ADRC-theme.css"),
           tags$link(rel="stylesheet", type="text/css", href="ADRC-dash.css"),
-          tags$style((".sidebar-menu li { margin-top:20px;}"))),
+          tags$style(HTML("
+            .sidebar-menu li { margin-top: 20px; }
+            .tab-content { padding: 20px; }
+            .nav-tabs { margin-bottom: 20px; }
+            .comparison-table { width: 100%; margin-bottom: 20px; }
+            .comparison-table td, .comparison-table th { padding: 8px; }
+            .content-wrapper { margin-left: 350px; }
+            .visit-tabs { margin-top: 20px; }
+            .visit-tabs .nav-tabs { border-bottom: 2px solid #dee2e6; }
+            .visit-tabs .nav-link { 
+              margin-right: 10px;
+              padding: 10px 20px;
+              font-size: 16px;
+            }
+            .visit-tabs .nav-link.active {
+              font-weight: bold;
+              border-bottom: 3px solid #007bff;
+            }
+          "))
+        ),
         
-        fluidRow(bs4Dash::box(width=12,
-                     title="Reviewer Comparison by Visit",
-                     div(uiOutput("comparison_tables"), style="font-size:20px"),
-                     align="center" ))
-          
-          
-        
+        fluidRow(
+          bs4Dash::box(
+            width = 12,
+            title = "Reviewer Comparison by Visit",
+            div(
+              uiOutput("comparison_tables"),
+              class = "comparison-container visit-tabs"
+            ),
+            align = "center"
+          )
+        )
       )  #End of dashboardBody
       
       
     )  #End of dashboardPage
   )
 }
+
 
 
 

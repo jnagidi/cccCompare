@@ -30,3 +30,116 @@ see utils_misc_fun.R for color palette
   font-weight: 500;
   color: #144B39;
 }
+
+/* Layout fixes */
+.content-wrapper {
+  margin-left: 350px !important;
+  padding: 20px;
+  min-height: 100vh;
+  background-color: #f4f6f9;
+}
+
+/* Sidebar styling */
+.sidebar {
+  position: fixed !important;
+  height: 100vh;
+  z-index: 1000;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* Comparison tables and tabsets */
+.comparison-container {
+  width: 100%;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.visit-tabs {
+  margin-top: 20px;
+}
+
+.visit-tabs .nav-tabs {
+  border-bottom: 2px solid #dee2e6;
+  margin-bottom: 20px;
+  padding: 0 10px;
+  display: flex;
+  gap: 15px;
+}
+
+.visit-tabs .nav-link {
+  margin-right: 0;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #495057;
+  border: none;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.visit-tabs .nav-link:hover {
+  border-bottom: 3px solid #007bff;
+  color: #007bff;
+}
+
+.visit-tabs .nav-link.active {
+  font-weight: bold;
+  color: #007bff;
+  border-bottom: 3px solid #007bff;
+  background-color: transparent;
+}
+
+.tab-content {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 0 0 8px 8px;
+}
+
+/* Table styling */
+.comparison-table {
+  width: 100%;
+  margin-bottom: 20px;
+  border-collapse: collapse;
+  background-color: #fff;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 12px;
+  border: 1px solid #dee2e6;
+  vertical-align: middle;
+}
+
+.comparison-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  color: #495057;
+}
+
+.comparison-table tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.comparison-table tr:hover {
+  background-color: #f1f3f5;
+}
+
+/* Box styling */
+.box {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.box-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.box-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #495057;
+}

@@ -9,15 +9,20 @@
  
 
 app_server <- function( input, output, session ) {
-
+  
   #Starting table
-  output$comparison_tables <- renderUI(tabPanel(wait_table))
+  output$comparison_tables <- renderUI({
+    tabsetPanel(
+      id = "comparison_tabs",
+      tabPanel("Ready", DT::renderDT(ready_table, options = list(dom = "t")))
+    )
+  })
   
   #Standard call to a modification of the initial_redcap_process of ADRCDash
   data_curr <- redcap_process()
   labels_curr <- data_curr[["labels"]]
   data_curr <- data_curr[["data"]]
-
+  
   #Get the column sets for comparison as well as redcap labels
   ccc_cols <- get_ccc_cols(data_curr)
   #ccc_labels <- get_redcap_labels(data_curr, ccc_cols)
@@ -30,30 +35,40 @@ app_server <- function( input, output, session ) {
   
   #Beging by showing the ready table
   output$comparison_tables <- renderUI(tabPanel(ready_table))
-
+  
   #Everything else is held within the observe event button
   observeEvent(input$compare_button, {
     
     #Process the ID
     id_curr <- reactive({process_id(input$id_entry)})
     
-  
+    
     #Get the current ID of interest
     data_proc <- pull_id(data_curr, id_curr())
-   
-    #Return NULL table by default
-    if(is.null(data_proc)){ output$comparison_tables <- renderUI(tabPanel(default_table))
     
+    #Return NULL table by default
+    if(is.null(data_proc)){
+      output$comparison_tables <- renderUI({
+        tabsetPanel(
+          id = "comparison_tabs",
+          tabPanel("No Data", DT::renderDT(default_table, options = list(dom = "t")))
+        )
+      })
     } else{
-
+      
       #Build the header for each event
       header_set <- build_header(data_proc)
-
+      
       #Build the comparison table
       comparison_set <- make_comparison_set(data_proc, .cols_comp = ccc_cols, .labels = ccc_labels)
       
-      #Build out the individual list entries into a tabsetpane
-      output$comparison_tables <- renderUI({make_compare_table(comparison_set, header_set)})
+      #Build out the individual list entries into a tabsetpanel
+      output$comparison_tables <- renderUI({
+        tabsetPanel(
+          id = "comparison_tabs",
+          tabPanel("Comparison", make_compare_table(comparison_set, header_set))
+        )
+      })
     }
     
   })

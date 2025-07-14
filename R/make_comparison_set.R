@@ -55,7 +55,7 @@ make_comparison_set <- function(.data, .cols_comp, .labels){
 
 #The function to handle the pivot process to get each reviewer on their own row
 
-double_pivot <- function(.dat, .cols, pattern_string = "ccc_(.*?)_(rev\\d*)"){
+double_pivot <- function(.dat, .cols, pattern_string = "(.*?)_(rev\\d*)"){
   
   #Pivot longer on everything to get reviewer as a column
   .dat <- tidyr::pivot_longer(.dat, cols = dplyr::all_of(.cols),
@@ -82,10 +82,10 @@ comparison_maker <- function(.dat, .labs,
   if(all(is.na(.dat[,grep(paste(always_return, collapse="|"), colnames(.dat)),with=FALSE]))) return(list(missing_table))
   
   #Start by building the headers on reviewer and date
-  .dat$header <- paste(.dat[["ex_ini"]], " - ", .dat[["form_dt"]])
+  .dat$header <- paste(.dat[["initialsd1a"]], " - ", .dat[["frmdated1a"]])
   
   #So for each column...
-  comparison_set <- lapply(colnames(.dat)[colnames(.dat) %not_in% c("Rev", "ex_ini", "form_dt", "header")], function(.col){
+  comparison_set <- lapply(colnames(.dat)[colnames(.dat) %not_in% c("Rev", "initialsd1a", "frmdated1a", "header")], function(.col){
     
     #For a first pass return NULL if everything is NA regardless of column type
     if(all(is.na(.dat[[.col]]))) return(NULL)

@@ -33,6 +33,7 @@ build_header <- function(.data, dict = header_columns_dict){
     .sex <- substr(.data_out[["sex"]][.row], 1, 1)
     #.race <- dplyr::recode(.data_out[["race"]][.row], !!!race_recode)
     .race <- race_recode[.data_out[["race"]][.row]]
+    .race[is.na(.race)] <- "Oth Race"
     
     #Make the header string
     paste0(.id, "; A1 Age: ", .data_out[["Age"]][.row], "; ", .race, " ", .sex, "; ", .data_out[["educ"]][.row], "Y Edu (", .event, ")")

@@ -27,7 +27,7 @@ app_server <- function( input, output, session ) {
   ccc_cols <- get_ccc_cols(data_curr)
   #ccc_labels <- get_redcap_labels(data_curr, ccc_cols)
   labels_curr <- labels_curr[colnames(data_curr) %in% ccc_cols]
-  labels_curr <- gsub("\\.\\.\\.\\d+$", "", labels_curr)
+  labels_curr <- gsub("\\.{3}d+$", "", labels_curr)
   names(labels_curr) <- ccc_cols
   ccc_labels <- get_redcap_labels(labels_curr, ccc_cols)
   

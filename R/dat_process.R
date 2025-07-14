@@ -10,22 +10,23 @@
 visit_read_in_alt <- function(token, synth = FALSE, dict = NULL, subtable_dict = NULL, use_redcap_factors = FALSE, ...){
 
   if(synth == FALSE){
-    dict <- ADRCDash:::redcap_dict
+    if(is.null(dict)) dict <- ADRCDash:::redcap_dict
 
     #1 - Read in the NACC dataset
     visit_token <- Sys.getenv(token)
-    nacc_curr_list <-  ADRCDash:::visit_read_in(token = "REDCAP_NACC_API_NEW", subtable_dict = NULL, .type = "nacc", synth=FALSE)
-    nacc_curr <- nacc_curr_list[["visits"]]
+    #nacc_curr_list <-  ADRCDash:::visit_read_in(token = "REDCAP_NACC_API_NEW", subtable_dict = NULL, .type = "nacc", synth=FALSE)
+    #nacc_curr <- nacc_curr_list[["visits"]]
 
     #visit_conn <- redcapAPI::redcapConnection(url="https://redcap.dom.uab.edu/api/", token=visit_token)
     #visit_curr <- redcapAPI::exportRecords(visit_conn, factors = use_redcap_factors)
     visit_curr <- REDCapR::redcap_read(redcap_uri = "https://redcap.dom.uab.edu/api/", token = visit_token)$data
-    labels_curr <- colnames(REDCapR::redcap_read(redcap_uri = "https://redcap.dom.uab.edu/api/", token = visit_token, records=1, raw_or_label_headers = "label")$data)
+    if(!(exists("labels_loaded"))) {labels_curr <- colnames(REDCapR::redcap_read(redcap_uri = "https://redcap.dom.uab.edu/api/", token = visit_token, records=1, raw_or_label_headers = "label")$data)
+    } else labels_curr <- labels_loaded
+    visit_curr <- visit_curr[,colnames(visit_curr) %in% names(labels_curr)]
     
-    
-
     #Coerce to data.table for populating
     visit_curr <- data.table::as.data.table(visit_curr)
+    setkeyv(visit_curr, dict[["redcap_key"]])
 
 
     #2- Extract subtable if needed (for example, inventory and M1 from )
@@ -36,21 +37,42 @@ visit_read_in_alt <- function(token, synth = FALSE, dict = NULL, subtable_dict =
     }
 
 
-    #3 - Fill down subject_data event
-
-    #First get the column names associated specifically with "subject_data_arm_1" by checking which columns are all NA's
-    visit_subj_data <- visit_curr[visit_curr[[dict[["event_col"]]]] == dict[["subj_event"]],]
-    subj_data_cols_to_drop <- which(colSums(is.na(visit_subj_data)) == nrow(visit_subj_data))
+    #3 - Fill down subject_data event and filter to desired event
+    
+    #First some expected variables from the subject data to the event data
+    #Build the lookup table
+    id_look <- visit_curr[visit_curr[[dict[["event_col"]]]] == dict[["subj_event"]],
+                          .SD[1,], 
+                          by = eval(dict[["redcap_key"]]),
+                          .SDcols = dict_copy]
+    #Apply the lookup to the other event
+    visit_curr[visit_curr[[dict[["event_col"]]]] == dict[["visit_event"]],
+               (paste0(dict_copy, dict[["column_annotate"]])) := id_look[.SD, on = dict[["redcap_key"]], mget(dict_copy)]]
+    
+    #If there are other variables that need to get copied over from the other event, add them to dict_copy above
+    
+    #Next filter to drop all columns that don't have the desired event annotation
+    cols_to_drop <- grep(paste(c(dict[["visit_col"]], dict[["event_col"]], dict[["redcap_key"]], dict[["column_annotate"]]), collapse="|"), 
+                         colnames(visit_curr), invert = TRUE)
+    # cols_to_drop <- which(colSums(is.na(visit_curr[visit_curr[[dict[["event_col"]]]] == dict[["visit_event"]],])) == 
+    #                         nrow(visit_curr[visit_curr[[dict[["event_col"]]]] == dict[["visit_event"]],]))
 
     #Assuming it's not length 0, drop those columns
-    if(length(subj_data_cols_to_drop) > 0){
-      subj_data_cols <- colnames(visit_subj_data)[-subj_data_cols_to_drop]
+    if(length(cols_to_drop) > 0){
+      subj_data_cols <- colnames(visit_curr)[-cols_to_drop]
+      visit_curr <- visit_curr[,-cols_to_drop, with = FALSE]
+      labels_curr <- labels_curr[-cols_to_drop]
     } else {
-      subj_data_cols <- colnames(visit_subj_data)
+      subj_data_cols <- colnames(visit_curr)
     }
 
     #Fill down the subject_info rows - this is all done by reference within fill_down_rows so we technically don't need to assign it
-    visit_curr <- ADRCDash:::fill_down_rows(visit_curr, dict = subj_data_cols, fill_key = dict[["redcap_key"]])
+    #visit_curr <- ADRCDash:::fill_down_rows(visit_curr, dict = subj_data_cols, fill_key = dict[["redcap_key"]])
+    visit_curr[, (subj_data_cols) := lapply(.SD, zoo::na.locf, na.rm = FALSE), by = eval(dict[["redcap_key"]]), .SDcols = subj_data_cols]
+
+    #Finally, drop the undesired event rows and remove the annotation
+    visit_curr <- visit_curr[visit_curr[[dict[["event_col"]]]] == dict[["visit_event"]],]
+    colnames(visit_curr) <- gsub(dict[["column_annotate"]], "", colnames(visit_curr))
 
   } else{
     visit_curr <- data.table::as.data.table(nacc_synth)
@@ -61,12 +83,16 @@ visit_read_in_alt <- function(token, synth = FALSE, dict = NULL, subtable_dict =
   #4 - Run redcap_drop_invalid_rows which checks on the A1 date
   #This drops the subject data which never has a min_field data and any visit_info events missing from the min_field dictionary
   #We pass ... to make use of certain projects e.g. min_fields differs between nacc visits and neuroimaging visits
-  visit_curr <- ADRCDash:::redcap_drop_invalid_rows(visit_curr, ...)
+  min_field_dict <- list(review = c("frmdated1a_rev1", "frmdated1a_rev2"))
+  visit_curr <- ADRCDash:::redcap_drop_invalid_rows(visit_curr, dict = min_field_dict, .type = "review")
 
   #Finally, reorder the data frames
   data.table::setorderv(visit_curr, cols = c(dict[["adrc_key"]], dict[["visit_col"]]))
 
 
+  
+  
+  
 
   #Return a list with each processed table which can be called as needed
   return(list(visits = visit_curr, subtable = subtable_curr, labels = labels_curr))
@@ -80,7 +106,7 @@ redcap_process <- function(){
   #.data <- ADRCDash:::redcap_read_in(simple = TRUE, synth = FALSE, use_spinner = FALSE, use_redcap_factors = TRUE)#,
                                      #export_forms_secondary = c("subject_info", "clinical_consensus_reviewer_1", "clinical_consensus_reviewer_2")
   #.data <- ADRCDash:::visit_read_in(token = "REDCAP_NACC_API_NEW", subtable_dict = NULL, .type = "nacc", synth=FALSE, use_redcap_factors = TRUE)[["visits"]]
-  .data_list <- visit_read_in_alt(token = "REDCAP_NACC_API_NEW", subtable_dict = NULL, .type = "nacc", synth=FALSE, use_redcap_factors = TRUE)
+  .data_list <- visit_read_in_alt(token = "UDS4_API", dict = uds4_redcap_dict, subtable_dict = NULL, .type = "nacc", synth=FALSE, use_redcap_factors = TRUE)
   .data <- .data_list[["visits"]]
   .labels <- .data_list[["labels"]]
 
@@ -93,14 +119,18 @@ redcap_process <- function(){
   #Build age variable based on DoB
   .data$birthmo <- as.numeric(as.character(.data$birthmo))
   .data[,Age := make_age(.SD, .today=FALSE),by=id_var]
+  
+  #Make race
+  .data[,race := make_race_var(.SD, .type = "long"),by=id_var]
 
   #Subset columns based on our restricted set
   .idx_grep <- grep(col_pull_grep, colnames(.data))
   .data <- .data[,.idx_grep, with=FALSE]
   .labels <- .labels[.idx_grep]
+  .labels <- gsub("\\.{3}\\d+$", "", .labels)
 
   #Do a fill down on whatever is left, currently only education and race from A1 based on the new processing done by visit_read_in() in ADRCDash:
-  .data <- ADRCDash:::fill_down_rows(.data, dict = c("educ", "race"))
+  .data <- ADRCDash:::fill_down_rows(.data, dict = c("birthsex", "educ", "race"))
 
   return(list(data = as.data.frame(.data), labels = .labels))
 }
@@ -115,7 +145,7 @@ redcap_process <- function(){
 
 #This is the updated version used by ADRCDash, this is just a placeholder until we update the package
 
-make_age <- function(df, yr_var = "birthyr", mo_var = "birthmo", .today = TRUE, alt_date_field = "a1_form_dt"){
+make_age <- function(df, yr_var = "birthyr", mo_var = "birthmo", .today = TRUE, alt_date_field = "frmdatea1"){
   
   if(.today == TRUE){
     yr_curr <- lubridate::year(lubridate::today())
@@ -163,9 +193,22 @@ drop_missing_rows <- function(.dat, dict = missing_row_dict){
 
 #Dictionary for missing rows, we just check to make sure at least one of these pairings exists
 
-missing_row_dict = list(c("ccc_form_dt_rev1", "ccc_form_dt_rev2"),
-                        c("ccc_ex_ini_rev1", "ccc_ex_ini_rev2"))
+missing_row_dict = list(c("frmdated1a_rev1", "frmdated1a_rev2"),
+                        c("initialsd1a_rev1", "initialsd1a_rev2"))
 
+
+#Updated UDS4 dictionary
+uds4_redcap_dict <- list(adrc_key = "adc_sub_id",
+                    redcap_key = "record_id",
+                    subj_event = "dmsc_only_arm_1",
+                    visit_event = "staff_entry_arm_1",
+                    event_col = "redcap_event_name",
+                    visit_col = "redcap_repeat_instance",
+#                    date_valid = "frmdatea1",
+#                    age_col = "c2_age",
+#                    educ_col = "educ",
+                    column_annotate = "_entry"
+)
 
 
 pull_id <- function(.dat, .id, .id_var = id_var){

@@ -15,6 +15,7 @@ make_comparison_set <- function(.data, .cols_comp, .labels){
       as.character(xx)
   }))
   
+  names(.labels) <- gsub("_rev\\d(_entry)?", "", names(.labels))
   
   #Next subset to only use the relevant comparison columns
   .data_proc <- .data[,colnames(.data) %in% c(event_var, .cols_comp)]
@@ -74,7 +75,7 @@ double_pivot <- function(.dat, .cols, pattern_string = "(.*?)_(rev\\d*)"){
 
 
 comparison_maker <- function(.dat, .labs,
-                             always_return = c("syndrm_stg", "numeric_stg"),
+                             always_return = c("normcog", "demented", "clin_notes_supp", "clin_notes_anti"),
                              clin_notes = c("Notes or observations IN SUPPORT of a diagnosis",
                                             "Notes or observations AGAINST a diagnosis")){
   

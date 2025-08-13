@@ -42,18 +42,19 @@ D1_redcap_names=
     "alzdis", "alzdisif", "lbdis", "lbdif", "ftld", "psp", "pspif", "cort", "cortif", "ftldmo", "ftldmoif", "ftldnos", "ftldnoif", "ftldsubt", "ftldsubx", 
     "cvd", "cvdif", "msa", "msaif", "cte", "cteif", "ctecert", "downs", "downsif", "hunt", "huntif", "prion", "prionif", "caa", "caaif", "late", "lateif", 
     "othcog", "othcogif", "othcogx")
-  
-  # c("dxmethod", "normcog", "scd", "scddxconf", "demented", "amndem", "pca", "ppasyn", "ppasynt", "ftdsyn", "lbdsyn", "namndem",
-  #    "mciamem", "mciaplus", "mciaplan", "mciapatt", "mciapex", "mciapvis", "mcinon1", "mcin1lan", "mcin1att", "mcin1ex", "mcin1vis", "mcinon2", "mcin2lan", "mcin2att", "mcin2ex", "mcin2vis", "impnomci",
-  #    "amylpet", "amylcsf", "fdgad", "hippatr", "taupetad", "csftau", "fdgftld", "tpetftld", "mrftld", "datscan", "othbiom", "othbiomx", "imaglinf", "imaglac", "imagmach", "imagmich", "imagmwmh", "imagewmh", "admut", "ftldmut", "othmut", "othmutx",
-  #    "alzdis", "alzdisif", "lbdis", "lbdif", "park", "msa", "msaif", "psp", "pspif", "cort", "cortif", "ftldmo", "ftldmoif", "ftldnos", "ftldnoif", "ftldsubt", "ftldsubx",
-  #    "cvd", "cvdif", "prevstk", "strokedec", "stkimag", "infnetw", "infwmh", "esstrem", "esstreif", "downs", "downsif", "hunt", "huntif", "prion", "prionif",
-  #    "brninj", "brninjif", "brnincte", "hyceph", "hycephif", "epilep", "epilepif", "neop", "neopif", "neopstat", "hiv", "hivif", "othcog", "othcogif", "othcogx",
-  #    "dep", "depif", "deptreat", "bipoldx", "bipoldif", "schizop", "schizoif", "anxiet", "anxietif", "delir", "delirif", "ptsddx", "ptsddxif", "othpsy", "othpsyif", "othpsyx",
-  #    "alcdem", "alcdemif", "alcabuse", "impsub", "impsubif", "dysill", "dysillif", "meds", "medsif", "cogoth", "cogothif", "cogothx", "cogoth2", "cogoth2f", "cogoth2x", "cogoth3", "cogoth3f", "cogoth3x")
+
+# c("dxmethod", "normcog", "scd", "scddxconf", "demented", "amndem", "pca", "ppasyn", "ppasynt", "ftdsyn", "lbdsyn", "namndem",
+#    "mciamem", "mciaplus", "mciaplan", "mciapatt", "mciapex", "mciapvis", "mcinon1", "mcin1lan", "mcin1att", "mcin1ex", "mcin1vis", "mcinon2", "mcin2lan", "mcin2att", "mcin2ex", "mcin2vis", "impnomci",
+#    "amylpet", "amylcsf", "fdgad", "hippatr", "taupetad", "csftau", "fdgftld", "tpetftld", "mrftld", "datscan", "othbiom", "othbiomx", "imaglinf", "imaglac", "imagmach", "imagmich", "imagmwmh", "imagewmh", "admut", "ftldmut", "othmut", "othmutx",
+#    "alzdis", "alzdisif", "lbdis", "lbdif", "park", "msa", "msaif", "psp", "pspif", "cort", "cortif", "ftldmo", "ftldmoif", "ftldnos", "ftldnoif", "ftldsubt", "ftldsubx",
+#    "cvd", "cvdif", "prevstk", "strokedec", "stkimag", "infnetw", "infwmh", "esstrem", "esstreif", "downs", "downsif", "hunt", "huntif", "prion", "prionif",
+#    "brninj", "brninjif", "brnincte", "hyceph", "hycephif", "epilep", "epilepif", "neop", "neopif", "neopstat", "hiv", "hivif", "othcog", "othcogif", "othcogx",
+#    "dep", "depif", "deptreat", "bipoldx", "bipoldif", "schizop", "schizoif", "anxiet", "anxietif", "delir", "delirif", "ptsddx", "ptsddxif", "othpsy", "othpsyif", "othpsyx",
+#    "alcdem", "alcdemif", "alcabuse", "impsub", "impsubif", "dysill", "dysillif", "meds", "medsif", "cogoth", "cogothif", "cogothx", "cogoth2", "cogoth2f", "cogoth2x", "cogoth3", "cogoth3f", "cogoth3x")
 
 colnames_ccc <- paste0(c("cogstat_c2", D1_redcap_names, 
-                                 "clin_notes_supp", "clin_notes_anti", "syndrm_stg", "numeric_stg"), "_rev\\d*")
+                         #"clin_notes_supp", "clin_notes_anti", "syndrm_stg", "numeric_stg"), "_rev\\d*")
+                         "clin_notes_supp", "clin_notes_anti"), "_rev\\d*")
 colnames_ccc_text_str <- "clin_notes|((oth|ftld).*?x)"
 
 
@@ -71,8 +72,8 @@ get_ccc_cols <- function(.dat){
 
 #Function to get REDCap labels
 get_redcap_labels <- function(.dat, redcap_cols,
-                              subset_string = "_rev1$",
-                              rename_string_in = "(.*?)_rev1$", 
+                              subset_string = "_rev1(_entry)?$",
+                              rename_string_in = "(.*?)_rev1(_entry)?$", 
                               rename_string_out = "\\1"){
   
   #Extract labels

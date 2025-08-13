@@ -3,7 +3,6 @@
 export(run_app)
 import(REDCapR)
 import(data.table)
-import(redcapAPI)
 import(shiny)
 importFrom(golem,activate_js)
 importFrom(golem,add_resource_path)

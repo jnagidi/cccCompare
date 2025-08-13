@@ -7,30 +7,25 @@
 
 build_DT_options <- function(.tab){
   
-  if(max(nchar(.tab[,1])) > 75){
-    width_1 = "50%"
-    width_2 = "25%"
-  } else{
-    width_1 = "36%"
-    width_2 = "32%"
-  }
+  question_col_width <- if(max(nchar(.tab[,1])) > 75) "15%" else "15%"
+  question_content_width <- "45%"  # Give more space to question content
+  reviewer_col_width <- "20%"      # Equal width for reviewer columns
   
   DT_options = 
     list(
-      autoWidth = TRUE,
+      autoWidth = FALSE,  # Disable autoWidth to use our custom widths
       dom = "t", 
-      columnDefs = list(list(width = width_1, targets = 0, searchable = FALSE),
-                        list(className = "dt-center", width = width_2, targets = c(1:(ncol(.tab)-1)), searchable = FALSE))
-      
-      
-      
-      
-      
+      columnDefs = list(
+        list(width = question_col_width, targets = 0, searchable = FALSE),
+        list(width = question_content_width, targets = 1, searchable = FALSE, className = "dt-left"),
+        list(width = reviewer_col_width, targets = c(2:(ncol(.tab)-1)), searchable = FALSE, className = "dt-center")
+      ),
+      scrollX = TRUE,  # Enable horizontal scrolling if needed
+      scrollCollapse = TRUE
     )
   
   return(DT_options)
 }
-
 
 #Note since we're using bootstrap we have to define "dt-center" within the CSS document
 #see https://datatables.net/reference/option/dom for details

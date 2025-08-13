@@ -103,6 +103,7 @@ see utils_misc_fun.R for color palette
   margin-bottom: 20px;
   border-collapse: collapse;
   background-color: #fff;
+  table-layout: fixed;
 }
 
 .comparison-table th,
@@ -110,6 +111,8 @@ see utils_misc_fun.R for color palette
   padding: 12px;
   border: 1px solid #dee2e6;
   vertical-align: middle;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .comparison-table th {
@@ -124,6 +127,53 @@ see utils_misc_fun.R for color palette
 
 .comparison-table tr:hover {
   background-color: #f1f3f5;
+}
+
+/* DataTables specific styling for better column distribution */
+.dataTables_wrapper .dataTable {
+  width: 100% !important;
+  table-layout: fixed;
+}
+
+.dataTables_wrapper .dataTable th,
+.dataTables_wrapper .dataTable td {
+  padding: 12px 8px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* Specific column width adjustments for comparison tables */
+.dataTables_wrapper .dataTable th:nth-child(1),
+.dataTables_wrapper .dataTable td:nth-child(1) {
+  width: 15% !important;
+  min-width: 120px;
+}
+
+.dataTables_wrapper .dataTable th:nth-child(2),
+.dataTables_wrapper .dataTable td:nth-child(2) {
+  width: 45% !important;
+  min-width: 200px;
+}
+
+.dataTables_wrapper .dataTable th:nth-child(3),
+.dataTables_wrapper .dataTable td:nth-child(3),
+.dataTables_wrapper .dataTable th:nth-child(4),
+.dataTables_wrapper .dataTable td:nth-child(4) {
+  width: 20% !important;
+  min-width: 100px;
+}
+
+/* Center alignment for reviewer columns */
+.dt-center {
+  text-align: center !important;
+}
+
+/* Ensure text wrapping in question column */
+.dataTables_wrapper .dataTable td:nth-child(2) {
+  text-align: left;
+  white-space: normal;
+  word-break: break-word;
 }
 
 /* Box styling */

@@ -30,21 +30,7 @@ app_ui <- function(request) {
       dark = NULL,
       scrollToTop = TRUE,
       preloader = preloader_spinner(),
-      
-      
-      
-      ##
-      #Header of page - using shinydashboardPlus
-      ##
-      # 
-      # header = dashboardHeaderPlus(titleWidth = 350,
-      #                              
-      #                              #Placement of UAB logo from images file
-      #                              title = tags$a(tags$img(src="img/logo.png", height='80', width='252', style="padding-top: 10px"))
-      #                              
-      #                              #Defining date toggle (adrc_toggle) as clickable checkbox in header
-      #                             
-      # ),
+
       
       header = bs4Dash::dashboardHeader(
         title = tags$a(
@@ -117,6 +103,11 @@ app_ui <- function(request) {
               font-weight: bold;
               border-bottom: 3px solid #007bff;
             }
+              /* Additional table styling for better spacing */
+            .dataTables_wrapper { width: 100%; }
+            .dataTables_wrapper .dataTable { width: 100% !important; }
+            .dt-left { text-align: left !important; }
+            .dt-center { text-align: center !important; }
           "))
         ),
         

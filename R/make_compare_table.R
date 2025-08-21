@@ -13,6 +13,7 @@ build_DT_options <- function(.tab){
   
   DT_options = 
     list(
+      pageLength = 50,
       autoWidth = FALSE,  # Disable autoWidth to use our custom widths
       dom = "t", 
       columnDefs = list(

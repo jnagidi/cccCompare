@@ -6,8 +6,8 @@ server: adrcpositconnect.dom.uab.edu
 envVars: UDS4_API
 hostUrl: https://adrcpositconnect.dom.uab.edu/__api__
 appId: 23
-bundleId: 136
-url: https://adrcpositconnect.dom.uab.edu/content/1315000d-c629-4eb3-aeac-489242439b18/
+bundleId:
+url: https://adrcpositconnect.dom.uab.edu/cccCompare/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE

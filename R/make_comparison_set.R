@@ -13,7 +13,7 @@ make_comparison_set <- function(.data, .cols_comp, .labels){
     do.call(cbind.data.frame, lapply(.data, function(xx){
       attributes(xx)$label <- NULL
       as.character(xx)
-  }))
+    }))
   
   names(.labels) <- gsub("_rev\\d(_entry)?", "", names(.labels))
   
@@ -90,7 +90,7 @@ comparison_maker <- function(.dat, .labs,
     
     #For a first pass return NULL if everything is NA regardless of column type
     if(all(is.na(.dat[[.col]]))) return(NULL)
-  
+    
     #Otherwise, first process non-free text fields
     if(length(grep(colnames_ccc_text_str, .col)) == 0){
       
@@ -112,8 +112,8 @@ comparison_maker <- function(.dat, .labs,
       } else .dat_out$consensus_drop <- FALSE
       
       return(.dat_out)
-    
-    #If it is a free text field we basically follow the same process but we keep it separate just in case    
+      
+      #If it is a free text field we basically follow the same process but we keep it separate just in case    
     } else {
       
       #Replace empty strings
@@ -135,8 +135,17 @@ comparison_maker <- function(.dat, .labs,
       return(.dat_out)
       
     }
-
+    
   })
+  
+  #Add D1a and D1b annotations to beginning of comparison_set
+  names(comparison_set) <- colnames(.dat)[colnames(.dat) %not_in% c("Rev", "initialsd1a", "frmdated1a", "header")]
+  comparison_set <- c(d1_annotations, comparison_set)
+  #Reorder based on annotations
+  comparison_set <- comparison_set[c(grep("^D1a$", names(comparison_set)),
+                                     c(grep(d1_positions[["D1a"]], names(comparison_set)):(grep(d1_positions[["D1b"]], names(comparison_set))-1)),
+                                     grep("^D1b$", names(comparison_set)),
+                                     c(grep(d1_positions[["D1b"]], names(comparison_set)):length(comparison_set)))]
   
   #Collapse the comparison list
   comparison_set <- purrr::compact(comparison_set)
@@ -152,7 +161,7 @@ comparison_maker <- function(.dat, .labs,
   
   #Temporary data frame dropping clinical notes (these are expected to differ and are always returned)
   #final_check <- comparison_set[comparison_set$Question %not_in% clin_notes,-c(1,ncol(comparison_set))]
-  final_check <- comparison_set[comparison_set$Question %not_in% clin_notes,grep("Reviewer", colnames(comparison_set))]
+  final_check <- comparison_set[comparison_set$Question %not_in% .labs[always_return],grep("Reviewer", colnames(comparison_set))]
   
   #Check if a review is blank by checking if all entries in a Reviewer's column were processed as ""
   empty_check <- do.call(c, 
@@ -168,16 +177,17 @@ comparison_maker <- function(.dat, .labs,
   if(sum(apply(final_check, 1, function(.row){length(unique(.row)) == 1})) == nrow(final_check)){
     conclusion <- c("NO DISCREPANCIES - CONFERENCE NOT NEEDED", rep("", ncol(comparison_set)-2))
     comparison_set <- comparison_set[-which(comparison_set$consensus_drop == TRUE),]
-  
-  #If idx_empty exists, an empty review probably exists
+    
+    #If idx_empty exists, an empty review probably exists
   } else if(length(empty_check) > 0){
     comparison_set[,empty_check] <- NA
     comparison_set[grep("Syndromal", comparison_set$Question),empty_check] <- "Review Appears Empty"
     conclusion <- c("A REVIEW APPEARS TO BE MISSING - PLEASE CHECK", rep("", ncol(comparison_set)-2))
-  
-  #Otherwise just indicate a discrepancy  
+    
+    #Otherwise just indicate a discrepancy  
   } else {
     conclusion <- c("DISCREPANCY NOTED - PLEASE REVIEW", rep("", ncol(comparison_set)-2))
+    comparison_set <- comparison_set[-which(comparison_set$consensus_drop == TRUE),]
   }
   comparison_set <- comparison_set[,-which(colnames(comparison_set) == "consensus_drop")]
   names(conclusion) <- colnames(comparison_set)
@@ -192,9 +202,9 @@ comparison_maker <- function(.dat, .labs,
   colnames(comparison_set)[-1] <- paste0(colnames(comparison_set)[-1], " ", t(gsub("NA  -  NA", "<br/>No Reviewer Details", .dat$header)))
   return(list(comparison_set))
 }
-  
-  
-  
+
+
+
 
 
 
@@ -205,9 +215,9 @@ comparison_maker <- function(.dat, .labs,
 
 #The first version which drops matching columns
 comparison_make_origr <- function(.dat, .labs,
-                             always_return = c("syndrm_stg", "numeric_stg"),
-                             clin_notes = c("Notes or observations IN SUPPORT of a diagnosis",
-                                            "Notes or observations AGAINST a diagnosis")){
+                                  always_return = c("syndrm_stg", "numeric_stg"),
+                                  clin_notes = c("Notes or observations IN SUPPORT of a diagnosis",
+                                                 "Notes or observations AGAINST a diagnosis")){
   
   #Start by building the headers on reviewer and date
   .dat$header <- paste(.dat[["ex_ini"]], " - ", .dat[["form_dt"]])
@@ -291,4 +301,11 @@ comparison_make_origr <- function(.dat, .labs,
 
 
 
-                          
+
+#Annotations for D1a and D1b
+d1_annotations <- list(D1a = data.frame(Question = "<b>D1a Questions</b>", Reviewer1 = "", Reviewer2 = "", consensus_drop = FALSE),
+                       D1b = data.frame(Question = "<b>D1b Questions</b>", Reviewer1 = "", Reviewer2 = "", consensus_drop = FALSE))
+
+d1_positions = c(D1a = "^cogstat_c2$", D1b = "^alzdis$")
+
+

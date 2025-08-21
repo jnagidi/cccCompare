@@ -75,7 +75,7 @@ double_pivot <- function(.dat, .cols, pattern_string = "(.*?)_(rev\\d*)"){
 
 
 comparison_maker <- function(.dat, .labs,
-                             always_return = c("normcog", "demented", "clin_notes_supp", "clin_notes_anti"),
+                             always_return = c("clin_notes_supp", "clin_notes_anti"),
                              clin_notes = c("Notes or observations IN SUPPORT of a diagnosis",
                                             "Notes or observations AGAINST a diagnosis")){
   
@@ -145,7 +145,9 @@ comparison_maker <- function(.dat, .labs,
   comparison_set <- comparison_set[c(grep("^D1a$", names(comparison_set)),
                                      c(grep(d1_positions[["D1a"]], names(comparison_set)):(grep(d1_positions[["D1b"]], names(comparison_set))-1)),
                                      grep("^D1b$", names(comparison_set)),
-                                     c(grep(d1_positions[["D1b"]], names(comparison_set)):length(comparison_set)))]
+                                     c(grep(d1_positions[["D1b"]], names(comparison_set)):(grep(d1_positions[["Notes"]], names(comparison_set))-1)),
+                                     grep("^Notes$", names(comparison_set)),
+                                     c(grep(d1_positions[["Notes"]], names(comparison_set)):length(comparison_set)))]
   
   #Collapse the comparison list
   comparison_set <- purrr::compact(comparison_set)
@@ -175,21 +177,26 @@ comparison_maker <- function(.dat, .labs,
   
   #If no discrepancies, check if all non-clinical note entries are equal 
   if(sum(apply(final_check, 1, function(.row){length(unique(.row)) == 1})) == nrow(final_check)){
-    conclusion <- c("NO DISCREPANCIES - CONFERENCE NOT NEEDED", rep("", ncol(comparison_set)-2))
+    conclusion <- c("<b>NO DISCREPANCIES - CONFERENCE NOT NEEDED</b>", rep("", ncol(comparison_set)-2))
     comparison_set <- comparison_set[-which(comparison_set$consensus_drop == TRUE),]
     
     #If idx_empty exists, an empty review probably exists
   } else if(length(empty_check) > 0){
     comparison_set[,empty_check] <- NA
     comparison_set[grep("Syndromal", comparison_set$Question),empty_check] <- "Review Appears Empty"
-    conclusion <- c("A REVIEW APPEARS TO BE MISSING - PLEASE CHECK", rep("", ncol(comparison_set)-2))
+    conclusion <- c("<b>A REVIEW APPEARS TO BE MISSING - PLEASE CHECK</b>", rep("", ncol(comparison_set)-2))
     
     #Otherwise just indicate a discrepancy  
   } else {
-    conclusion <- c("DISCREPANCY NOTED - PLEASE REVIEW", rep("", ncol(comparison_set)-2))
-    comparison_set <- comparison_set[-which(comparison_set$consensus_drop == TRUE),]
+    conclusion <- c("<b>DISCREPANCY NOTED - PLEASE REVIEW</b>", rep("", ncol(comparison_set)-2))
+    #comparison_set <- comparison_set[-which(comparison_set$consensus_drop == TRUE),]
+    comparison_set_list <- lapply(comparison_set[,-which(colnames(comparison_set) == "consensus_drop")], function(.col){
+      .col[!is.na(comparison_set$consensus_drop) & comparison_set$consensus_drop == "FALSE" & comparison_set$Question %not_in% clin_notes] <- 
+        paste("<span style='color: #9f1818'>", .col[!is.na(comparison_set$consensus_drop) & comparison_set$consensus_drop == "FALSE" & comparison_set$Question %not_in% clin_notes], "</span>")
+      return(.col)})
+    comparison_set <- data.frame(comparison_set_list)
   }
-  comparison_set <- comparison_set[,-which(colnames(comparison_set) == "consensus_drop")]
+  comparison_set <- comparison_set[,grep("consensus_drop", colnames(comparison_set), invert = TRUE)]
   names(conclusion) <- colnames(comparison_set)
   
   
@@ -283,9 +290,9 @@ comparison_make_origr <- function(.dat, .labs,
   #Add a conclusion row, drop clinical notes and check if all remaining entries (which are always returned) are equal
   final_check <- comparison_set[comparison_set$Question %not_in% clin_notes,-1]
   if(sum(apply(final_check, 1, function(.row){length(unique(.row)) == 1})) == nrow(final_check)){
-    conclusion <- c("NO DISCREPANCIES - CONFERENCE NOT NEEDED", rep("", ncol(comparison_set)-1))
+    conclusion <- c("<b>NO DISCREPANCIES - CONFERENCE NOT NEEDED</b>", rep("", ncol(comparison_set)-1))
   } else{
-    conclusion <- c("DISCREPANCY NOTED - PLEASE REVIEW", rep("", ncol(comparison_set)-1))
+    conclusion <- c("<b>DISCREPANCY NOTED - PLEASE REVIEW</b>", rep("", ncol(comparison_set)-1))
   }
   names(conclusion) <- colnames(comparison_set)
   
@@ -303,9 +310,10 @@ comparison_make_origr <- function(.dat, .labs,
 
 
 #Annotations for D1a and D1b
-d1_annotations <- list(D1a = data.frame(Question = "<b>D1a Questions</b>", Reviewer1 = "", Reviewer2 = "", consensus_drop = FALSE),
-                       D1b = data.frame(Question = "<b>D1b Questions</b>", Reviewer1 = "", Reviewer2 = "", consensus_drop = FALSE))
+d1_annotations <- list(D1a = data.frame(Question = "<b>D1a Questions</b>", Reviewer1 = "", Reviewer2 = "", consensus_drop = TRUE),
+                       D1b = data.frame(Question = "<b>D1b Questions</b>", Reviewer1 = "", Reviewer2 = "", consensus_drop = TRUE),
+                       Notes = data.frame(Question = "<b>Reviewer Notes</b>", Reviewer1 = "", Reviewer2 = "", consensus_drop = TRUE))
 
-d1_positions = c(D1a = "^cogstat_c2$", D1b = "^alzdis$")
+d1_positions = c(D1a = "^cogstat_c2$", D1b = "^alzdis$", Notes = "^clin_notes_supp")
 
 

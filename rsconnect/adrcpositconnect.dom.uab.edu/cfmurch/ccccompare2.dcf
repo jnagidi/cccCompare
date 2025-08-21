@@ -1,13 +1,13 @@
-name: ccccompare
+name: ccccompare2
 title: cccCompare
 username: cfmurch
 account: cfmurch
 server: adrcpositconnect.dom.uab.edu
 envVars: UDS4_API
 hostUrl: https://adrcpositconnect.dom.uab.edu/__api__
-appId: 23
-bundleId: 146
-url: https://adrcpositconnect.dom.uab.edu/cccCompare/
+appId: 24
+bundleId:
+url: https://adrcpositconnect.dom.uab.edu/content/d4ca952c-4f37-47fd-872f-5b84c5aec61c/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE

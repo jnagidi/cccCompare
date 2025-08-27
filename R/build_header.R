@@ -36,7 +36,7 @@ build_header <- function(.data, dict = header_columns_dict){
     .race[is.na(.race)] <- "Oth Race"
     
     #Make the header string
-    paste0(.id, "; A1 Age: ", .data_out[["Age"]][.row], "; ", .race, " ", .sex, "; ", .data_out[["educ"]][.row], "Y Edu (", .event, ")")
+    paste0(.id, "; A1 Age: ", .data_out[["Age"]][.row], "; ", .race, "; ", .sex, "; ", .data_out[["educ"]][.row], "Y Edu (", .event, ")")
   })
   names(.string_out) <- paste0("Visit ", (gsub("_arm_1", "", .data_out[[event_var]])))
   

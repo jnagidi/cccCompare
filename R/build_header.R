@@ -30,7 +30,7 @@ build_header <- function(.data, dict = header_columns_dict){
     #.event <- toupper(gsub("_arm_1", "", .data_out[[event_var]][.row]))
     .event <- paste0("Visit ", gsub("_arm_1", "", .data_out[[event_var]][.row]))
     .id <- .data_out[[id_var]][.row]
-    .sex <- substr(.data_out[["sex"]][.row], 1, 1)
+    .sex <- substr(.data_out[["birthsex"]][.row], 1, 1)
     #.race <- dplyr::recode(.data_out[["race"]][.row], !!!race_recode)
     .race <- race_recode[.data_out[["race"]][.row]]
     .race[is.na(.race)] <- "Oth Race"

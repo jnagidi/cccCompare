@@ -1,0 +1,12 @@
+# Ignore RStudio project files
+.Rproj.user
+*.Rproj
+.Rhistory
+.RData
+.Ruserdata
+
+# Ignore Git
+.git
+.gitignore
+
+.Renviron

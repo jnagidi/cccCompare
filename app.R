@@ -4,4 +4,6 @@
 
 pkgload::load_all(export_all = FALSE,helpers = FALSE,attach_testthat = FALSE)
 options( "golem.app.prod" = TRUE)
-cccCompare::run_app() # add parameters here (if any)
+#cccCompare::run_app() # add parameters here (if any)
+
+cccCompare::run_app(host = "0.0.0.0", port = 3838)

@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ghcr.io/jnagidi/cccCompare
+  IMAGE_NAME: jnagidi/ccccompare
 
 jobs:
   build-and-push:

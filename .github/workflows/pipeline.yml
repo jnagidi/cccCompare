@@ -27,7 +27,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.SECRET}}
+          password: ${{ secrets.GITHUB_TOKEN}}
 
       - name: Build Docker image
         uses: docker/build-push-action@v4
@@ -37,6 +37,8 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          build-args: |
+            GITHUB_PAT=${{ secrets.SECRET }}
 
       - name: Verify pushed image
         run: |

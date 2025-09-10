@@ -2,7 +2,8 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 env:
   REGISTRY: ghcr.io
@@ -14,20 +15,29 @@ jobs:
     permissions:
       contents: read
       packages: write
-
+    concurrency:
+      group: build-and-push-${{ github.ref }}
+      cancel-in-progress: true
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v5
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.SECRET}}
 
-      - name: Build the Docker image
-        run: docker build --build-arg GITHUB_PAT=${{ secrets.SECRET }} -t $REGISTRY/${IMAGE_NAME}:latest .
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      - name: Push the image
-        run: docker push $REGISTRY/${IMAGE_NAME}:latest
+      - name: Verify pushed image
+        run: |
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}

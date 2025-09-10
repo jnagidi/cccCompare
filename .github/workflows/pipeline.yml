@@ -27,7 +27,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build the Docker image
-        run: docker build --build-arg GITHUB_PAT=${{ secrets.GITHUB_PAT }} -t $REGISTRY/${IMAGE_NAME}:latest .
+        run: docker build --build-arg GITHUB_PAT=${{ secrets.SECRET }} -t $REGISTRY/${IMAGE_NAME}:latest .
 
       - name: Push the image
         run: docker push $REGISTRY/${IMAGE_NAME}:latest

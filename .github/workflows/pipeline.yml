@@ -39,6 +39,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           build-args: |
             GITHUB_PAT=${{ secrets.SECRET }}
+            UDS4_API=${{ secrets.UDS4_API }}
 
       - name: Verify pushed image
         run: |

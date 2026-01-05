@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.4.1
+FROM rocker/shiny:4.4.1
 
 # -----------------------------
 # Install system dependencies

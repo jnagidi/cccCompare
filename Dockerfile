@@ -33,8 +33,8 @@ ENV RENV_CONFIG_CACHE_ENABLED="TRUE"
 # -----------------------------
 # GitHub PAT for private packages
 # -----------------------------
-ARG PAT_GITHUB
-ENV GITHUB_PAT=${PAT_GITHUB}
+ARG GITHUB_PAT
+ENV GITHUB_PAT=${GITHUB_PAT}
 
 # Optional: force git-based installs (avoids GitHub tarball API issues)
 ENV RENV_GITHUB_SOURCE=git
@@ -55,10 +55,6 @@ COPY . /home/app
 # Install renv and restore dependencies
 # -----------------------------
 RUN R -e "install.packages('renv', repos='https://packagemanager.posit.co/cran/latest')"
-
-# Optional: check GITHUB_PAT visibility
-RUN R -e "cat('GITHUB_PAT=', Sys.getenv('GITHUB_PAT'), '\\n'); stopifnot(nzchar(Sys.getenv('GITHUB_PAT')))"
-
 RUN R -e "renv::restore(confirm = FALSE)"
 
 # -----------------------------

@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y \
     libc-dev \
     && rm -rf /var/lib/apt/lists/*
 
-ENV RENV_CONFIG_CACHE_ENABLED="FALSE"
+ENV RENV_CONFIG_CACHE_ENABLED="TRUE"
 
 ARG PAT_GITHUB
 ENV PAT_GITHUB=${PAT_GITHUB}
@@ -35,8 +35,7 @@ WORKDIR /home/app
 
 COPY . /home/app
 
-RUN R -e "install.packages('renv', repos = 'https://packagemanager.posit.co/cran/latest')"
-RUN R -e "renv::restore(confirm = FALSE)"
+RUN R -e "source('./renv/activate.R'); renv::restore(confirm = TRUE)"
 
 RUN chown -R root:root /home/app
 

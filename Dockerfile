@@ -39,9 +39,7 @@ ENV GITHUB_PAT=${GITHUB_PAT}
 # Optional: force git-based installs (avoids GitHub tarball API issues)
 ENV RENV_GITHUB_SOURCE=git
 
-# -----------------------------
-# API keys
-# -----------------------------
+
 ARG UDS4_API
 ENV UDS4_API=${UDS4_API}
 

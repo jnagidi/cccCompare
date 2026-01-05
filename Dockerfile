@@ -1,6 +1,8 @@
 FROM rocker/r-ver:4.4.1
 
+# -----------------------------
 # Install system dependencies
+# -----------------------------
 RUN apt-get update && apt-get install -y \
     build-essential \
     libcurl4-openssl-dev \
@@ -23,23 +25,49 @@ RUN apt-get update && apt-get install -y \
     libc-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# -----------------------------
+# Enable renv cache
+# -----------------------------
 ENV RENV_CONFIG_CACHE_ENABLED="TRUE"
 
+# -----------------------------
+# GitHub PAT for private packages
+# -----------------------------
 ARG PAT_GITHUB
 ENV GITHUB_PAT=${PAT_GITHUB}
 
+# Optional: force git-based installs (avoids GitHub tarball API issues)
+ENV RENV_GITHUB_SOURCE=git
+
+# -----------------------------
+# API keys
+# -----------------------------
 ARG UDS4_API
-ENV UDS4_API=$UDS4_API
+ENV UDS4_API=${UDS4_API}
 
+# -----------------------------
+# App setup
+# -----------------------------
 WORKDIR /home/app
-
 COPY . /home/app
 
-RUN R -e "install.packages('renv', repos = 'https://packagemanager.posit.co/cran/latest')"
+# -----------------------------
+# Install renv and restore dependencies
+# -----------------------------
+RUN R -e "install.packages('renv', repos='https://packagemanager.posit.co/cran/latest')"
+
+# Optional: check GITHUB_PAT visibility
+RUN R -e "cat('GITHUB_PAT=', Sys.getenv('GITHUB_PAT'), '\\n'); stopifnot(nzchar(Sys.getenv('GITHUB_PAT')))"
+
 RUN R -e "renv::restore(confirm = FALSE)"
 
+# -----------------------------
+# Fix permissions
+# -----------------------------
 RUN chown -R root:root /home/app
 
+# -----------------------------
+# Shiny port and start
+# -----------------------------
 EXPOSE 3838
-
 CMD ["R", "-e", "shiny::runApp('/home/app', host='0.0.0.0', port=3838)"]

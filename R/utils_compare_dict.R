@@ -72,8 +72,8 @@ get_ccc_cols <- function(.dat){
 
 #Function to get REDCap labels
 get_redcap_labels <- function(.dat, redcap_cols,
-                              subset_string = "_rev1(_entry)?$",
-                              rename_string_in = "(.*?)_rev1(_entry)?$", 
+                              subset_string = "_rev1$",
+                              rename_string_in = "(.*?)_rev1?$", 
                               rename_string_out = "\\1"){
   
   #Extract labels

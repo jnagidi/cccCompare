@@ -94,7 +94,7 @@ redcap_process <- function(){
   #.data <- ADRCDash:::redcap_read_in(simple = TRUE, synth = FALSE, use_spinner = FALSE, use_redcap_factors = TRUE)#,
   #export_forms_secondary = c("subject_info", "clinical_consensus_reviewer_1", "clinical_consensus_reviewer_2")
   #.data <- ADRCDash:::visit_read_in(token = "REDCAP_NACC_API_NEW", subtable_dict = NULL, .type = "nacc", synth=FALSE, use_redcap_factors = TRUE)[["visits"]]
-  .data_list <- visit_read_in_alt(token = "UDS4_Staff", dict = uds4_redcap_dict, subtable_dict = NULL, .type = "nacc", synth=FALSE, use_redcap_factors = TRUE)
+  .data_list <- visit_read_in_alt(token = "UDS4_API", dict = uds4_redcap_dict, subtable_dict = NULL, .type = "nacc", synth=FALSE, use_redcap_factors = TRUE)
   .data <- .data_list[["visits"]]
   .labels <- .data_list[["labels"]]
   

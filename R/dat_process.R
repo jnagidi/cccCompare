@@ -120,7 +120,7 @@ redcap_process <- function(){
   
   #Do a fill down on whatever is left, currently only education and race from A1 based on the new processing done by visit_read_in() in ADRCDash:
   #.data <- ADRCDash:::fill_down_rows(.data, dict = c("birthsex", "educ", "race"))
-  .data <- ADRCDash:::fill_down_rows(.data, dict = c("birthsex", "educ", "race"),.type = "locf", fill_key = dict[["redcap_key"]])
+  .data <- ADRCDash:::fill_down_rows(.data, dict = c("birthsex", "educ", "race"),.type = "locf", fill_key = uds4_redcap_dict[["adrc_key"]])
   
   return(list(data = as.data.frame(.data), labels = .labels))
 }

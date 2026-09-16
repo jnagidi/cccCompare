@@ -32,7 +32,17 @@ build_header <- function(.data, dict = header_columns_dict){
     .id <- .data_out[[id_var]][.row]
     .sex <- substr(.data_out[["birthsex"]][.row], 1, 1)
     #.race <- dplyr::recode(.data_out[["race"]][.row], !!!race_recode)
-    .race <- race_recode[.data_out[["race"]][.row]]
+    #.race <- race_recode[.data_out[["race"]][.row]]
+    race <- .data_out[["race"]][.row]
+    
+    if (grepl("Black or African American", race, fixed = TRUE)) {
+      .race <- "B/AA"
+    } else if (grepl("White", race, fixed = TRUE)) {
+      .race <- "W"
+    } else {
+      .race <- NA_character_
+    }
+    
     .race[is.na(.race)] <- "Oth Race"
     
     #Make the header string

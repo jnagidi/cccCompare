@@ -14,7 +14,7 @@ reviewer_cols <- c("frmdated1a_rev1", "frmdated1a_rev2", "initialsd1a_rev1", "in
 header_columns_dict <- list(col_var = c(id_var, event_var, "Age", "race", "birthsex", "educ"),
                             numeric_var = c(rep(FALSE, 5), TRUE))
 
-race_recode <- c("Black or African American" = "B/AA", "White" = "W")
+#race_recode <- c("Black or African American" = "B/AA", "White" = "W")
 
 
 
@@ -117,4 +117,4 @@ process_id <- function(.id, .head = "ADC"){
 
 
 #Dictionary of variables to copy from one event to another
-dict_copy <- c("adc_sub_id", "frmdatea1", "birthmo", "birthyr", "raceaian", "raceasian", "raceblack", "ethispanic", "racemena", "racenhpi", "racewhite", "birthsex", "educ")
+dict_copy <- c("adc_sub_id", "birthmo", "birthyr", "raceaian", "raceasian", "raceblack", "ethispanic", "racemena", "racenhpi", "racewhite", "birthsex", "educ")

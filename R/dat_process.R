@@ -53,11 +53,12 @@ visit_read_in_alt <- function(token, synth = FALSE, dict = NULL, subtable_dict =
     #If there are other variables that need to get copied over from the other event, add them to dict_copy above
     
     #Fill down only the subject-level columns across visit rows
-    subj_data_cols <- cols_to_copy
+    #subj_data_cols <- cols_to_copy
     
     #Fill down the subject_info rows - this is all done by reference within fill_down_rows so we technically don't need to assign it
     #visit_curr <- ADRCDash:::fill_down_rows(visit_curr, dict = subj_data_cols, fill_key = dict[["redcap_key"]])
-    visit_curr[, (subj_data_cols) := lapply(.SD, zoo::na.locf, na.rm = FALSE), by = eval(dict[["redcap_key"]]), .SDcols = subj_data_cols]
+    
+    #visit_curr[, (subj_data_cols) := lapply(.SD, zoo::na.locf, na.rm = FALSE), by = eval(dict[["redcap_key"]]), .SDcols = subj_data_cols]
     
     #Finally, drop the undesired event rows
     visit_curr <- visit_curr[visit_curr[[dict[["event_col"]]]] %in% dict[["visit_event"]],]
@@ -102,15 +103,19 @@ redcap_process <- function(){
   .data <- drop_missing_rows(.data)
   
   #Make sure the dataframe is properly sorted according to date
-  #.data <- ADRCDash:::redcap_order_rows(.data)
+
+  .data[,race := make_race_var(.SD, .type = "long"), by=seq_len(nrow(.data))]
+
+  .data[redcap_repeat_instance > 1, race := NA]
+  
+  .data <- ADRCDash:::fill_down_rows(.data, dict = c("birthsex", "educ", "race","birthyr","birthmo"),
+                                     .type = "locf", fill_key = uds4_redcap_dict[["adrc_key"]])
   
   #Build age variable based on DoB
   .data$birthmo <- as.numeric(as.character(gsub("(\\d+)(\\b ).*", "\\1", .data$birthmo)))
+  .data$birthyr <- as.numeric(as.character(.data$birthyr))
   .data[,Age := make_age(.SD, .today=FALSE),by=id_var]
   
-  #Make race
-  .data[,race := make_race_var(.SD, .type = "long"),by=id_var]
-  .data[redcap_repeat_instance > 1, race := NA]
   
   #Subset columns based on our restricted set
   .idx_grep <- grep(col_pull_grep, colnames(.data))
@@ -120,7 +125,7 @@ redcap_process <- function(){
   
   #Do a fill down on whatever is left, currently only education and race from A1 based on the new processing done by visit_read_in() in ADRCDash:
   #.data <- ADRCDash:::fill_down_rows(.data, dict = c("birthsex", "educ", "race"))
-  .data <- ADRCDash:::fill_down_rows(.data, dict = c("birthsex", "educ", "race"),.type = "locf", fill_key = uds4_redcap_dict[["adrc_key"]])
+  
   
   return(list(data = as.data.frame(.data), labels = .labels))
 }
